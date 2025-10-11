@@ -1,48 +1,36 @@
-
 pipeline {
     agent any
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout from Git (replace with actual repo if needed)
+                // Clone your repo to Jenkins workspace
                 git branch: 'main', url: 'https://github.com/abhilashrai28/New.git'
             }
         }
 
-        stage('Copy Zip to Nginx Folder') {
-            steps {
-                script {
-                    def workspaceDir = "${env.WORKSPACE}"
-                    def nginxDir = "/var/www/html"
-
-                    // Copy zip file to Nginx directory
-                    sh """
-                        sudo cp "${workspaceDir}/grocery-reactjs.zip" "${nginxDir}/"
-                    """
-                }
-            }
-        }
-
-        stage('Unzip and Clean Up') {
+        stage('Create Target Folder in /root') {
             steps {
                 sh """
-                    cd /var/www/html
-                    sudo unzip -o grocery-reactjs.zip
-                    sudo rm -f grocery-reactjs.zip
+                    sudo mkdir -p /root/myapp
                 """
             }
         }
 
-        stage('Move App Files to Root') {
+        stage('Copy ZIP to /root/myapp') {
             steps {
                 sh """
-                    cd /var/www/html
-                    if [ -d "grocery-reactjs" ]; then
-                        echo "==== Moving files from grocery-reactjs/ to /var/www/html ===="
-                        sudo mv grocery-reactjs/* .
-                        sudo rm -rf grocery-reactjs
-                    fi
+                    sudo cp "\${WORKSPACE}/grocery-reactjs.zip" /root/myapp/
+                """
+            }
+        }
+
+        stage('Unzip in /root/myapp') {
+            steps {
+                sh """
+                    cd /root/myapp
+                    sudo unzip -o grocery-reactjs.zip
+                    sudo rm -f grocery-reactjs.zip
                 """
             }
         }
@@ -50,15 +38,9 @@ pipeline {
         stage('Fix Permissions') {
             steps {
                 sh """
-                    sudo chown -R www-data:www-data /var/www/html
-                    sudo chmod -R 755 /var/www/html
+                    sudo chown -R root:root /root/myapp
+                    sudo chmod -R 755 /root/myapp
                 """
-            }
-        }
-
-        stage('Restart Nginx') {
-            steps {
-                sh 'sudo systemctl restart nginx'
             }
         }
     }
@@ -68,7 +50,7 @@ pipeline {
             echo '❌ Deployment failed.'
         }
         success {
-            echo '✅ Deployment successful.'
+            echo '✅ Deployment successful to /root/myapp.'
         }
     }
 }
