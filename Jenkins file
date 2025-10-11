@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        TARGET_DIR = '/opt/myapp'
+        ZIP_FILE = 'grocery-reactjs.zip'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,28 +14,29 @@ pipeline {
             }
         }
 
-        stage('Create Target Folder in /root') {
+        stage('Create Target Folder') {
             steps {
                 sh """
-                    sudo mkdir -p /root/myapp
+                    sudo mkdir -p ${TARGET_DIR}
+                    sudo chown -R $(whoami):$(whoami) ${TARGET_DIR}
                 """
             }
         }
 
-        stage('Copy ZIP to /root/myapp') {
+        stage('Copy ZIP to target folder') {
             steps {
                 sh """
-                    sudo cp "\${WORKSPACE}/grocery-reactjs.zip" /root/myapp/
+                    cp "${WORKSPACE}/${ZIP_FILE}" ${TARGET_DIR}/
                 """
             }
         }
 
-        stage('Unzip in /root/myapp') {
+        stage('Unzip in target folder') {
             steps {
                 sh """
-                    cd /root/myapp
-                    sudo unzip -o grocery-reactjs.zip
-                    sudo rm -f grocery-reactjs.zip
+                    cd ${TARGET_DIR}
+                    unzip -o ${ZIP_FILE}
+                    rm -f ${ZIP_FILE}
                 """
             }
         }
@@ -38,8 +44,8 @@ pipeline {
         stage('Fix Permissions') {
             steps {
                 sh """
-                    sudo chown -R root:root /root/myapp
-                    sudo chmod -R 755 /root/myapp
+                    sudo chown -R root:root ${TARGET_DIR}
+                    sudo chmod -R 755 ${TARGET_DIR}
                 """
             }
         }
@@ -50,7 +56,7 @@ pipeline {
             echo '❌ Deployment failed.'
         }
         success {
-            echo '✅ Deployment successful to /root/myapp.'
+            echo '✅ Deployment successful to /opt/myapp.'
         }
     }
 }
