@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        TARGET_DIR = '/opt/myapp'
+        TARGET_DIR = '/var/www/html'
         ZIP_FILE = 'grocery-reactjs.zip'
     }
 
