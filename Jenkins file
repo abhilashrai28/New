@@ -1,0 +1,74 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout from Git (replace with actual repo if needed)
+                git branch: 'main', url: 'https://your-repo-url.git'
+            }
+        }
+
+        stage('Copy Zip to Nginx Folder') {
+            steps {
+                script {
+                    def workspaceDir = "${env.WORKSPACE}"
+                    def nginxDir = "/var/www/html"
+
+                    // Copy zip file to Nginx directory
+                    sh """
+                        sudo cp "${workspaceDir}/grocery-reactjs.zip" "${nginxDir}/"
+                    """
+                }
+            }
+        }
+
+        stage('Unzip and Clean Up') {
+            steps {
+                sh """
+                    cd /var/www/html
+                    sudo unzip -o grocery-reactjs.zip
+                    sudo rm -f grocery-reactjs.zip
+                """
+            }
+        }
+
+        stage('Move App Files to Root') {
+            steps {
+                sh """
+                    cd /var/www/html
+                    if [ -d "grocery-reactjs" ]; then
+                        echo "==== Moving files from grocery-reactjs/ to /var/www/html ===="
+                        sudo mv grocery-reactjs/* .
+                        sudo rm -rf grocery-reactjs
+                    fi
+                """
+            }
+        }
+
+        stage('Fix Permissions') {
+            steps {
+                sh """
+                    sudo chown -R www-data:www-data /var/www/html
+                    sudo chmod -R 755 /var/www/html
+                """
+            }
+        }
+
+        stage('Restart Nginx') {
+            steps {
+                sh 'sudo systemctl restart nginx'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '❌ Deployment failed.'
+        }
+        success {
+            echo '✅ Deployment successful.'
+        }
+    }
+}
