@@ -13,12 +13,19 @@ COPY tailadmin-vuejs-1.0.0.zip /app/
 # Remove default Nginx HTML files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Unzip the site into Nginx default folder
-RUN unzip /app/tailadmin-vuejs-1.0.0.zip -d /usr/share/nginx/html/
+# Unzip into a temporary folder
+RUN unzip /app/tailadmin-vuejs-1.0.0.zip -d /app/unzipped
+
+# Copy the **contents** of the unzipped folder into Nginx folder
+RUN cp -r /app/unzipped/tailadmin-vuejs-1.0.0/* /usr/share/nginx/html/
+
+# Optional cleanup
+RUN rm -rf /app/unzipped /app/tailadmin-vuejs-1.0.0.zip
 
 # Expose Nginx port
 EXPOSE 80
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
+
 
