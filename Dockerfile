@@ -14,7 +14,7 @@ COPY tailadmin-vuejs-1.0.0.zip /app/
 RUN rm -rf /usr/share/nginx/html/*
 
 # Unzip the site into Nginx default folder
-RUN unzip /app/tailadmin-vuejs-1.0.0.zip/ -d /usr/share/nginx/html/
+RUN unzip /app/tailadmin-vuejs-1.0.0.zip -d /usr/share/nginx/html/
 
 # Expose Nginx port
 EXPOSE 80
