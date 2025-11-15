@@ -8,19 +8,19 @@ RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy the ZIP file into the container
-COPY tailadmin-vuejs-1.0.0.zip /app/
+COPY Electro-Bootstrap-1.0.0.zip /app/
 
 # Remove default Nginx HTML files
 RUN rm -rf /usr/share/nginx/html/*
 
 # Unzip into a temporary folder
-RUN unzip /app/tailadmin-vuejs-1.0.0.zip -d /app/unzipped
+RUN unzip /app/Electro-Bootstrap-1.0.0.zip -d /app/unzipped
 
 # Copy the **contents** of the unzipped folder into Nginx folder
-RUN cp -r /app/unzipped/tailadmin-vuejs-1.0.0/* /usr/share/nginx/html/
+RUN cp -r /app/unzipped/Electro-Bootstrap-1.0.0/. /usr/share/nginx/html/
 
 # Optional cleanup
-RUN rm -rf /app/unzipped /app/tailadmin-vuejs-1.0.0.zip
+RUN rm -rf /app/unzipped /app/Electro-Bootstrap-1.0.0.zip
 
 # Expose Nginx port
 EXPOSE 80
